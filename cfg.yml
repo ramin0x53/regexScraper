@@ -1,0 +1,34 @@
+entryPoints:
+  - "github.com"
+  - "github.com/test"
+  - "github.com/ramin"
+allowDomains:
+  - "github.com"
+  - "google.com"
+  - "test.com"
+# disAllowDomains:
+#   - "game.com"
+threadsCount: 20
+redis:
+  address: "127.0.0.1:6379"
+  password: ""
+  db: 0
+  prefix: "regexscrapper"
+jsonOutput: True
+# randomUserAgent: true
+# randomMobileUserAgent: true
+userAgent: "chrome web"
+search:
+  - regex: "/aaa"
+    include:
+      - "ramin"
+    exclude:
+      - "ali"
+      - "ars"
+  - regex: "/errr"
+    include:
+      - "aaag"
+      - "aadfs"
+    exclude:
+      - "aer"
+      - "ooo"
