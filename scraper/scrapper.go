@@ -61,7 +61,6 @@ func (cfg *ScrapperCfg) InitScrapper() {
 		for _, searchKeyword := range *cfg.SearchKeywords {
 			results := findRegex(&searchKeyword, &r.Body)
 			for _, res := range results {
-				fmt.Println(res)
 				cfg.Result <- SearchResult{
 					ScrapperId: cfg.ScrapperId,
 					Url:        r.Request.URL.String(),
