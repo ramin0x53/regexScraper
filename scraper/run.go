@@ -35,7 +35,7 @@ func Run(cfg *config.Config, outputPath string) {
 		compiledPatterns = append(compiledPatterns, compiledPattern)
 	}
 
-	results := make(chan SearchResult, 100)
+	results := make(chan SearchResult, 1000)
 	for i, entryPoint := range cfg.EntryPoints {
 		scrapperConfig := ScrapperCfg{
 			ScrapperId:            i,
