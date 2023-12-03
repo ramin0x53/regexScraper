@@ -1,7 +1,9 @@
 package scraper
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
@@ -50,15 +52,30 @@ func (cfg *ScrapperCfg) InitScrapper() {
 		extensions.RandomMobileUserAgent(collector)
 	}
 
+	collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		link := e.Attr("href")
+		e.Request.Visit(link)
+	})
+
 	collector.OnResponse(func(r *colly.Response) {
 		for _, searchKeyword := range *cfg.SearchKeywords {
 			results := findRegex(&searchKeyword, &r.Body)
 			for _, res := range results {
+				fmt.Println(res)
 				cfg.Result <- SearchResult{
 					ScrapperId: cfg.ScrapperId,
 					Url:        r.Request.URL.String(),
 					Word:       res,
 				}
+			}
+		}
+
+		//check for none html pages
+		if !strings.Contains(r.Headers.Get("Content-Type"), "html") {
+			urlRegex := regexp.MustCompile(`https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`)
+			matchUrls := urlRegex.FindAllString(string(r.Body), -1)
+			for _, link := range matchUrls {
+				r.Request.Visit(link)
 			}
 		}
 	})
@@ -68,16 +85,20 @@ func (cfg *ScrapperCfg) InitScrapper() {
 
 func findRegex(regex *CompiledPattern, body *[]byte) []string {
 	text := string(*body)
-	findResults := []string{}
 	match := regex.Regex.FindAllString(text, -1)
-	for _, include := range regex.Include {
-		if include.MatchString(text) {
-			for _, exclude := range regex.Exclude {
-				if !exclude.MatchString(text) {
-					findResults = append(findResults, match...)
-				}
+	if regex.Include != nil {
+		for _, include := range regex.Include {
+			if !include.MatchString(text) {
+				return []string{}
 			}
 		}
 	}
-	return findResults
+	if regex.Exclude != nil {
+		for _, exclude := range regex.Exclude {
+			if exclude.MatchString(text) {
+				return []string{}
+			}
+		}
+	}
+	return match
 }

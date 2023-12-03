@@ -16,12 +16,22 @@ func Run(cfg *config.Config, outputPath string) {
 	for _, pattern := range cfg.Search {
 		compiledPattern := CompiledPattern{}
 		compiledPattern.Regex = regexp.MustCompile(pattern.Regex)
-		for _, inc := range pattern.Include {
-			compiledPattern.Include = append(compiledPattern.Include, regexp.MustCompile(inc))
+		if len(pattern.Include) > 0 {
+			for _, inc := range pattern.Include {
+				compiledPattern.Include = append(compiledPattern.Include, regexp.MustCompile(inc))
+			}
+		} else {
+			compiledPattern.Include = nil
 		}
-		for _, exc := range pattern.Exclude {
-			compiledPattern.Exclude = append(compiledPattern.Exclude, regexp.MustCompile(exc))
+
+		if len(pattern.Exclude) > 0 {
+			for _, exc := range pattern.Exclude {
+				compiledPattern.Exclude = append(compiledPattern.Exclude, regexp.MustCompile(exc))
+			}
+		} else {
+			compiledPattern.Exclude = nil
 		}
+
 		compiledPatterns = append(compiledPatterns, compiledPattern)
 	}
 
